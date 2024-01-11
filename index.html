@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload File</title>
+    <style>
+      .custom-form .form {
+        flex-direction: column;
+        align-items: baseline;
+      }
+
+      .choose-file-container {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+        padding: 8px 10px;
+        border: 1.2px dashed #9a9a9a;
+        border-radius: 2px;
+        transition: 0.2s;
+      }
+
+      .upload-image-container {
+        margin-bottom: 30px;
+      }
+
+      #errorMessage {
+        margin: 0;
+        font-size: 12px;
+        color: red;
+      }
+      .image-preview {
+        width: 100%;
+        display: none;
+        height: auto;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .image-preview__image {
+        display: block;
+        max-width: 70px;
+        border: 2px solid white;
+      }
+
+      #clearImage {
+        max-width: 25px;
+        max-height: 25px;
+        cursor: pointer;
+        border-radius: 50%;
+        background-color: #ffffffa8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .image-preview .image-part {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .file-name {
+        display: inline-block;
+        max-width: 200px; /* Adjust as needed */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="upload-image-container">
+      <label class="form__label" for="upload-image">Upload Image</label>
+      <div class="choose-file-container">
+        <p class="line-item-property__field">
+          <input id="upload-image" type="file" name="properties[Image]" />
+        </p>
+
+        <div class="image-preview" id="imagePreview">
+          <div class="image-part">
+            <img src="" alt="Image Preview" class="image-preview__image" />
+            <span class="file-name"> </span>
+          </div>
+
+          <span id="clearImage" class="clear-button">
+            <svg
+              width="30px"
+              height="30px"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g
+                id="SVGRepo_tracerCarrier"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></g>
+              <g id="SVGRepo_iconCarrier">
+                <path
+                  d="M16 8L8 16M8.00001 8L16 16"
+                  stroke="#000000"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </g>
+            </svg>
+          </span>
+        </div>
+      </div>
+      <p id="errorMessage"></p>
+    </div>
+
+    <script>
+      const inpFile = document.getElementById("upload-image");
+      const previewContainer = document.getElementById("imagePreview");
+      const previewImage = previewContainer.querySelector(
+        ".image-preview__image"
+      );
+      const clearButton = previewContainer.querySelector("#clearImage");
+      const chooseInput = document.querySelector(".line-item-property__field");
+      const mainContainer = document.querySelector(".choose-file-container");
+      const fileName = document.querySelector(".image-preview .file-name");
+      const errorMessage = document.getElementById("errorMessage");
+
+      inpFile.addEventListener("change", function () {
+        const file = this.files[0];
+
+        console.log(file);
+
+        if (file) {
+          const reader = new FileReader();
+          previewImage.style.display = "block";
+          clearButton.style.display = "flex";
+          chooseInput.style.display = "none";
+          previewContainer.style.display = "flex";
+          mainContainer.style.backgroundColor = "#2c6ecb";
+
+          fileName.textContent = file.name;
+
+          reader.addEventListener("load", function () {
+            const image = new Image();
+            image.src = this.result;
+
+            image.onload = function () {
+              let aspectRatio = image.width / image.height;
+              console.log("image.width:", image.width);
+              console.log("image.height:", image.height);
+              console.log("Aspect Ratio:", aspectRatio);
+
+              if (aspectRatio <= 1.4 || aspectRatio >= 1.6) {
+                console.log("not valid");
+                inpFile.value = null;
+                previewImage.style.display = "none";
+                clearButton.style.display = "none";
+                chooseInput.style.display = "block";
+                previewContainer.style.display = "none";
+                mainContainer.style.backgroundColor = "transparent";
+                fileName.textContent = "";
+                previewImage.setAttribute("src", "");
+                errorMessage.textContent = "Image should 1.4:1 aspect ratio";
+              } else {
+                // Set the image source here, outside the onload function
+                previewImage.setAttribute("src", reader.result);
+                errorMessage.textContent = "";
+              }
+            };
+          });
+
+          reader.readAsDataURL(file);
+        } else {
+          previewImage.style.display = null;
+          clearButton.style.display = "none";
+          previewImage.setAttribute("src", "");
+          chooseInput.style.display = "block";
+          previewContainer.style.display = "none";
+          mainContainer.style.backgroundColor = "transparent";
+          fileName.textContent = "";
+        }
+      });
+
+      clearButton.addEventListener("click", function () {
+        inpFile.value = null;
+        previewImage.style.display = "none";
+        clearButton.style.display = "none";
+        chooseInput.style.display = "block";
+        previewContainer.style.display = "none";
+        mainContainer.style.backgroundColor = "transparent";
+        fileName.textContent = "";
+      });
+    </script>
+  </body>
+</html>
